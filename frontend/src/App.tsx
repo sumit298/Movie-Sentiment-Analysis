@@ -1,33 +1,78 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react'
+// import './App.css'
+import axios from 'axios';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [movies, setMovies] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [pageNo, setPageNo] = useState(1);
+
+  const handleNextPageNo = () => {
+    setPageNo(pageNo + 1);
+  }
+
+  const handlePrevPageNo = ()=> {
+    if(pageNo!== 0){
+      setPageNo(pageNo-1);
+    }
+  }
+
+
+  const url = `https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=${pageNo}`
+  useEffect(() => {
+    const fetchMovies = async () => {
+      try {
+        setLoading(true)
+        const res = await axios.get(url, {
+          headers: {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3ZDhlMjc0NTk2NjdhMGZmOWVkMjg4NmQ1YzExNTE1YyIsInN1YiI6IjYwOGZiYWM2YWFmZWJkMDAyYTQ2Zjk2YyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Qk7Iw2XBdmI-68ZjtNxJitJxfamEvjPNZR-bB7fxXmQ',
+            'accept': 'application/json'
+          }
+        })
+        const result = await res.data;
+        console.log(result.results);
+        setMovies(result.results)
+        setLoading(false)
+      } catch (error) {
+        setLoading(false)
+        setError(error?.message)
+      }
+    }
+
+    fetchMovies()
+  }, [pageNo])
+
+  console.log(movies)
+
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className='bg-slate-700 text-white w-full'>
+        <div className='flex justify-between px-12 py-4'>
+          <button className='px-4 py-2 rounded-lg bg-orange-700' onClick={handlePrevPageNo}>Prev Page</button>
+          <button className='px-4 py-2 rounded-lg bg-orange-700' onClick={handleNextPageNo}>Next Page</button>
+        </div>
+        <div className=' mb-4 p-12 flex flex-wrap gap-8 '>
+          {
+            !loading && movies?.map((movie) => {
+              return (
+                <div key={movie?.id} className="mb-4">
+                  <div className="">
+                    <img src={`https://image.tmdb.org/t/p/w500/${movie?.backdrop_path}`} alt={movie?.backdrop} />
+                    <p className='text-xl font-semibold w-full mt-2'>{movie.original_title}</p>
+                    <span className=''>{movie.title}</span>
+                    <p className='text-lg '>Popularity Score: {movie.popularity}</p>
+                    <p>Release Date: {movie.release_date}</p>
+                    <p>Language: {movie.original_language}</p>
+                    <p>IsAdult: {movie?.adult}</p>
+                  </div>
+                </div>
+              )
+            })
+          }
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
