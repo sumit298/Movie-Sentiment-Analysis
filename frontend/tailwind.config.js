@@ -5,7 +5,13 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
-  },
+    extend: {
+      fontFamily: {
+        'montserrat': ['Montserrat'],
+        'nunito': ['Nunito'],
+        'museomoderno': ['MuseoModerno']
+      }
+    },
+   },
   plugins: [],
 }
